@@ -1,0 +1,27 @@
+--- a/kernel/selinux/rules.c
++++ b/kernel/selinux/rules.c
+@@ -1,3 +1,5 @@
++/* This file requires SELinux internals not available before 5.4 */
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0)
+ #include "linux/rcupdate.h"
+ #include "security.h"
+ #include <linux/uaccess.h>
+@@ -531,3 +533,4 @@
+ 
+     return ret;
+ }
++#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0) */
+--- a/kernel/selinux/selinux.h
++++ b/kernel/selinux/selinux.h
+@@ -29,7 +29,11 @@
+ 
+ bool is_init(const struct cred *cred);
+ 
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0)
+ void apply_kernelsu_rules();
++#else
++static inline void apply_kernelsu_rules(void) {}
++#endif
+ 
+ int handle_sepolicy(void __user *user_data, u64 data_len);
+ 
