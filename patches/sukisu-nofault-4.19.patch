@@ -1,5 +1,5 @@
---- a/kernel_compat.h
-+++ b/kernel_compat.h
+--- a/kernel/kernel_compat.h
++++ b/kernel/kernel_compat.h
 @@ -3,6 +3,34 @@
  
  #include <linux/fs.h>
