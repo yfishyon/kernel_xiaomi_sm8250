@@ -1,0 +1,18 @@
+--- a/kernel/infra/file_wrapper.c
++++ b/kernel/infra/file_wrapper.c
+@@ -15,6 +15,15 @@
+ 
+ #include "objsec.h"
+ 
++/* 4.19 compat: selinux_inode() not accessible from external modules */
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 0)
++#ifndef selinux_inode
++#include <linux/selinux.h>
++static inline struct inode_security_struct *selinux_inode(const struct inode *inode) {
++    return inode->i_security;
++}
++#endif
++#endif
+ #include "ksu.h"
+ #include "klog.h" // IWYU pragma: keep
+ #include "selinux/selinux.h"
