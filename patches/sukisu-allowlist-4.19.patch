@@ -1,0 +1,26 @@
+--- a/kernel/policy/allowlist.c
++++ b/kernel/policy/allowlist.c
+@@ -18,6 +18,11 @@
+ #include <linux/kref.h>
+ 
+ #include "klog.h" // IWYU pragma: keep
++
++/* 4.19 compat: fallthrough was added in 5.4 */
++#ifndef fallthrough
++#define fallthrough __attribute__((__fallthrough__))
++#endif
+ #include "ksu.h"
+ #include "runtime/ksud_boot.h"
+ #include "selinux/selinux.h"
+@@ -469,7 +474,11 @@
+         goto put_task;
+     }
+     cb->func = do_persistent_allow_list;
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 0, 0)
+     if (task_work_add(tsk, cb, TWA_RESUME)) {
++#else
++    if (task_work_add(tsk, cb, true)) {
++#endif
+         kfree(cb);
+         pr_warn("save_allow_list add task_work failed\n");
+     }
