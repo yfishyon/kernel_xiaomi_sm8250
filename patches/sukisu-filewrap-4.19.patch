@@ -1,6 +1,22 @@
 --- a/kernel/infra/file_wrapper.c
 +++ b/kernel/infra/file_wrapper.c
-@@ -85,6 +85,7 @@
+@@ -15,6 +15,15 @@
+ 
+ #include "objsec.h"
+ 
++/* 4.19 compat: selinux_inode() not accessible from external modules */
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 0)
++#ifndef selinux_inode
++static inline struct inode_security_struct *selinux_inode(const struct inode *inode) {
++    return inode->i_security;
++}
++#endif
++#endif
++
+ #include "ksu.h"
+ #include "klog.h" // IWYU pragma: keep
+ #include "selinux/selinux.h"
+@@ -85,6 +94,7 @@
      return orig->f_op->write_iter(iocb, iovi);
  }
  
@@ -8,7 +24,7 @@
  #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0)
  static int ksu_wrapper_iopoll(struct kiocb *kiocb, struct io_comp_batch *icb, unsigned int v)
  {
-@@ -102,6 +103,7 @@
+@@ -102,6 +112,7 @@
      return orig->f_op->iopoll(kiocb, spin);
  }
  #endif
@@ -16,7 +32,7 @@
  
  #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 0)
  static int ksu_wrapper_iterate(struct file *fp, struct dir_context *dc)
-@@ -303,6 +305,7 @@
+@@ -303,6 +314,7 @@
      return orig->f_op->copy_file_range(file_in, pos_in, orig, pos_out, len, flags);
  }
  
@@ -24,17 +40,17 @@
  // no REMAP_FILE_DEDUP: use file_in
  // https://cs.android.com/android/kernel/superproject/+/common-android-mainline:common/fs/read_write.c;l=1598-1599;drc=398da7defe218d3e51b0f3bdff75147e28125b60
  // https://cs.android.com/android/kernel/superproject/+/common-android-mainline:common/fs/remap_range.c;l=403-404;drc=398da7defe218d3e51b0f3bdff75147e28125b60
-@@ -321,6 +324,9 @@
+@@ -320,6 +332,9 @@
+         struct file *orig = data->orig;
          return orig->f_op->remap_file_range(orig, pos_in, file_out, pos_out, len, remap_flags);
      }
- }
++
 +#endif /* remap_file_range */
 +
-+}
+ }
  
  static int ksu_wrapper_fadvise(struct file *fp, loff_t off1, loff_t off2, int flags)
- {
-@@ -361,7 +367,9 @@
+@@ -361,7 +376,9 @@
      p->ops.write = fp->f_op->write ? ksu_wrapper_write : NULL;
      p->ops.read_iter = fp->f_op->read_iter ? ksu_wrapper_read_iter : NULL;
      p->ops.write_iter = fp->f_op->write_iter ? ksu_wrapper_write_iter : NULL;
@@ -44,7 +60,7 @@
  #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 0)
      p->ops.iterate = fp->f_op->iterate ? ksu_wrapper_iterate : NULL;
  #endif
-@@ -392,7 +400,9 @@
+@@ -392,7 +409,9 @@
      p->ops.fallocate = fp->f_op->fallocate ? ksu_wrapper_fallocate : NULL;
      p->ops.show_fdinfo = fp->f_op->show_fdinfo ? ksu_wrapper_show_fdinfo : NULL;
      p->ops.copy_file_range = fp->f_op->copy_file_range ? ksu_wrapper_copy_file_range : NULL;
