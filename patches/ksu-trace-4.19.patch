@@ -1,0 +1,14 @@
+--- a/kernel/hook/syscall_hook_manager.c
++++ b/kernel/hook/syscall_hook_manager.c
+@@ -91,6 +91,11 @@
+ static struct kretprobe *syscall_unregfunc_rp = NULL;
+ #endif
+ 
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 2, 0)
++/* register_trace_prio_sys_enter was added in 5.2; use the non-prio version */
++#define register_trace_prio_sys_enter(probe, data, prio) register_trace_sys_enter(probe, data)
++#endif
++
+ #ifdef CONFIG_HAVE_SYSCALL_TRACEPOINTS
+ // sys_enter handler: redirect hooked syscalls to the dispatcher
+ static void ksu_sys_enter_handler(void *data, struct pt_regs *regs, long id)
