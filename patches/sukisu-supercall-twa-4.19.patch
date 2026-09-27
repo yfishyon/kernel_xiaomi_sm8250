@@ -1,0 +1,14 @@
+--- a/kernel/supercall/supercall.c	2026-09-28 00:30:08.921725826 +0800
++++ b/kernel/supercall/supercall.c	2026-09-28 00:30:34.093725817 +0800
+@@ -18,6 +18,11 @@
+ #include "util.h"
+ #include "klog.h" // IWYU pragma: keep
+ 
++
++/* TWA_RESUME was introduced in Linux 5.12; use true on older kernels */
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 12, 0)
++#define TWA_RESUME true
++#endif
+ #define KSU_DRIVER_PERMISSION_SU_SESSION (1UL << 0)
+ 
+ struct ksu_driver_context {
