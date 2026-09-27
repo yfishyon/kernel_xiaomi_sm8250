@@ -1,0 +1,18 @@
+--- a/kernel/selinux/selinux.c
++++ b/kernel/selinux/selinux.c
+@@ -2,6 +2,15 @@
+ #include "linux/cred.h"
+ #include "linux/sched.h"
+ #include "objsec.h"
++
++/* 4.19 compat: selinux_cred() not accessible from external modules */
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 0)
++#ifndef selinux_cred
++static inline struct cred_security_struct *selinux_cred(const struct cred *cred) {
++    return cred->security;
++}
++#endif
++#endif
+ #include "linux/version.h"
+ #include "klog.h" // IWYU pragma: keep
+ #include "ksu.h"
