@@ -1,0 +1,70 @@
+--- a/kernel_compat.h
++++ b/kernel_compat.h
+@@ -3,6 +3,34 @@
+ 
+ #include <linux/fs.h>
+ #include <linux/version.h>
++#include <linux/uaccess.h>
++
++/* -- 4.19 compat: nofault family (kernel 4.20+/5.9+) -- */
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 20, 0)
++static inline long __must_check copy_from_user_nofault(void *to, const void __user *from, unsigned long n) {
++    if (!__range_ok(from, n)) return -EFAULT;
++    pagefault_disable();
++    n = __copy_from_user_inatomic(to, from, n);
++    pagefault_enable();
++    return n;
++}
++static inline long __must_check copy_to_user_nofault(void __user *to, const void *from, unsigned long n) {
++    if (!__range_ok(to, n)) return -EFAULT;
++    pagefault_disable();
++    n = __copy_to_user_inatomic(to, from, n);
++    pagefault_enable();
++    return n;
++}
++#endif
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 9, 0)
++static inline long strncpy_from_user_nofault(char *dst, const void __user *unsafe_addr, long count) {
++    long ret;
++    pagefault_disable();
++    ret = strncpy_from_user(dst, unsafe_addr, count);
++    pagefault_enable();
++    return ret >= count ? count : ret;
++}
++#endif
+ 
+ /*
+  * ksu_copy_from_user_retry
+
+--- a/kernel/feature/sucompat.c
++++ b/kernel/feature/sucompat.c
+@@ -27,6 +27,7 @@
+ #include "sulog/event.h"
+ #include "ksu.h"
+ #include "util.h"
++#include "../kernel_compat.h"
+ 
+ #define SU_PATH "/system/bin/su"
+ #define SH_PATH "/system/bin/sh"
+
+--- a/kernel/runtime/ksud_integration.c
++++ b/kernel/runtime/ksud_integration.c
+@@ -28,6 +28,7 @@
+ #include "selinux/selinux.h"
+ #include "hook/syscall_hook.h"
+ #include "hook/syscall_event_bridge.h"
++#include "../kernel_compat.h"
+ 
+ // clang-format off
+ static const char KERNEL_SU_RC[] =
+
+--- a/kernel/sulog/event.c
++++ b/kernel/sulog/event.c
+@@ -18,6 +18,7 @@
+ #include "infra/event_queue.h"
+ #include "klog.h" // IWYU pragma: keep
+ #include "sulog/event.h"
++#include "../../kernel_compat.h"
+ 
+ #define KSU_SULOG_MAX_QUEUED 256U
+ #define KSU_SULOG_MAX_PAYLOAD_LEN 2048U
