@@ -1,5 +1,5 @@
---- a/drivers/kernelsu/kpm/kpm.c	2026-09-27 23:46:01.033966867 +0800
-+++ b/drivers/kernelsu/kpm/kpm.c	2026-09-27 23:46:55.337966846 +0800
+--- a/kernel/kpm/kpm.c	2026-09-27 23:46:01.033966867 +0800
++++ b/kernel/kpm/kpm.c	2026-09-27 23:46:55.337966846 +0800
 @@ -38,6 +38,13 @@
  #include "kpm.h"
  #include "compact.h"
