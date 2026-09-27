@@ -8,7 +8,7 @@
 +/* 4.19 compat: selinux_cred() not accessible from external modules */
 +#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 0)
 +#ifndef selinux_cred
-+static inline struct cred_security_struct *selinux_cred(const struct cred *cred) {
++static inline struct task_security_struct *selinux_cred(const struct cred *cred) {
 +    return cred->security;
 +}
 +#endif
