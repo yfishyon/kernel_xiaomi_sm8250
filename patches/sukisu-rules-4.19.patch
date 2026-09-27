@@ -1,12 +1,13 @@
 --- a/kernel/selinux/rules.c
 +++ b/kernel/selinux/rules.c
-@@ -1,3 +1,5 @@
+@@ -1,3 +1,6 @@
++#include <linux/version.h>
 +/* This file requires SELinux internals not available before 5.4 */
 +#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0)
  #include "linux/rcupdate.h"
  #include "security.h"
  #include <linux/uaccess.h>
-@@ -531,3 +533,4 @@
+@@ -531,3 +534,4 @@
  
      return ret;
  }
