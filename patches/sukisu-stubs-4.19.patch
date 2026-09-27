@@ -1,0 +1,51 @@
+--- a/kernel/core/init.c	2026-09-28 01:49:35.736354155 +0800
++++ b/kernel/core/init.c	2026-09-28 01:50:03.997279189 +0800
+@@ -248,3 +248,48 @@
+ #else
+ MODULE_IMPORT_NS(VFS_internal_I_am_really_a_filesystem_and_am_NOT_a_driver);
+ #endif
++
++/* Stub implementations for hooks not available on this kernel version */
++
++long ksu_handle_sys_reboot(int orig_nr, const struct pt_regs *regs)
++{
++    return 0;
++}
++
++long ksu_handle_faccessat(int orig_nr, const struct pt_regs *regs)
++{
++    return 0;
++}
++
++long ksu_handle_stat(int orig_nr, const struct pt_regs *regs)
++{
++    return 0;
++}
++
++long ksu_handle_execveat(int orig_nr, const struct pt_regs *regs)
++{
++    return 0;
++}
++
++long ksu_handle_vfs_read(int orig_nr, const struct pt_regs *regs)
++{
++    return 0;
++}
++
++void ksu_vfs_read_hook(void) {}
++void ksu_input_hook(void) {}
++void ksu_execveat_hook(void) {}
++void ksu_handle_devpts(void) {}
++
++void seccomp_filter_release(void) {}
++
++int path_mount(const char *dev_name, struct path *path, const char *type_page,
++               unsigned long flags, void *data)
++{
++    return 0;
++}
++
++int handle_sepolicy(void __user *user_data, u64 data_len)
++{
++    return 0;
++}
