@@ -1,0 +1,27 @@
+--- a/kernel/feature/selinux_hide.c	2026-09-28 00:43:12.673725527 +0800
++++ b/kernel/feature/selinux_hide.c	2026-09-28 00:43:51.049725512 +0800
+@@ -29,6 +29,9 @@
+ #include "policy/feature.h"
+ #include "hook/lsm_hook.h"
+ 
++/* Guard: SELinux internals changed significantly; requires 5.4+ */
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0)
++
+ static DEFINE_MUTEX(selinux_hide_mutex);
+ static bool ksu_selinux_hide_enabled __read_mostly = false;
+ static bool ksu_selinux_hide_running __read_mostly = false;
+@@ -1144,3 +1147,14 @@
+     goto out;
+ }
+ #endif
++
++#else /* LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 0) */
++
++/* Stub implementations for pre-5.4 kernels */
++void ksu_selinux_hide_init(void) {}
++void ksu_selinux_hide_exit(void) {}
++void ksu_selinux_hide_drop_backup_if_unused(void) {}
++void ksu_selinux_hide_handle_second_stage(void) {}
++void ksu_selinux_hide_handle_post_fs_data(void) {}
++
++#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0) */
