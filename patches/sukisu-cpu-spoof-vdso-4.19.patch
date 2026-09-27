@@ -1,0 +1,33 @@
+--- a/kernel/feature/cpu_spoof.c	2026-09-28 00:57:20.757725204 +0800
++++ b/kernel/feature/cpu_spoof.c	2026-09-28 01:11:49.205724872 +0800
+@@ -158,6 +158,7 @@
+                     struct clocksource **curr_cs_ptr =
+                         (struct clocksource **)find_kernel_symbol_exact("curr_clocksource");
+                     if (curr_cs_ptr && *curr_cs_ptr) {
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 7, 0)
+                         struct clocksource *cs = *curr_cs_ptr;
+                         pr_info("ksu: set_spoof_cpu found active clocksource '%s' (current vdso_clock_mode: %d)\n",
+                                 cs->name ? cs->name : "unknown", cs->vdso_clock_mode);
+@@ -165,10 +166,14 @@
+                         pr_info("ksu: set_spoof_cpu updated clocksource '%s' vdso_clock_mode to %d\n",
+                                 cs->name ? cs->name : "unknown", cs->vdso_clock_mode);
+                     } else {
++#else
++                        pr_info("ksu: vdso_clock_mode requires >= 5.7\n");
+                         pr_warn("ksu: set_spoof_cpu failed to resolve 'curr_clocksource'\n");
++#endif
+                     }
+                 }
+ 
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 7, 0)
+                 /* Overwrite fallback default clock mode variable */
+                 {
+                     enum vdso_clock_mode *vd_default = (enum vdso_clock_mode *)find_kernel_symbol_exact("vdso_default");
+@@ -180,6 +185,7 @@
+                         pr_warn("ksu: set_spoof_cpu failed to resolve 'vdso_default'\n");
+                     }
+                 }
++#endif
+ 
+                 /* Resolve and clear capability bitmap (handles cpu_hwcaps / system_cpucaps fallback) */
+                 {
