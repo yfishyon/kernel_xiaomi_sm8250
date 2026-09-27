@@ -1,15 +1,16 @@
 --- a/kernel/kpm/kpm.c
 +++ b/kernel/kpm/kpm.c
-@@ -15,6 +15,12 @@
- #include <linux/file.h>
- #include <linux/vmalloc.h>
- #include <linux/uaccess.h>
+@@ -18,6 +18,13 @@
+ #include <linux/elf.h>
+ #include <linux/kallsyms.h>
+ #include <linux/version.h>
++#include <linux/uaccess.h>  /* 4.19 compat: ensure __range_ok visible below */
 +
 +/* 4.19 compat: access_ok() became (addr, size) in v5.0; older kernels take (type, addr, size) */
 +#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 0, 0)
 +#undef access_ok
 +#define access_ok(addr, size) __range_ok((addr), (size))
 +#endif
- #include <linux/elf.h>
- #include <linux/kallsyms.h>
- #include <linux/version.h>
+ #include <linux/list.h>
+ #include <linux/spinlock.h>
+ #include <linux/rcupdate.h>
